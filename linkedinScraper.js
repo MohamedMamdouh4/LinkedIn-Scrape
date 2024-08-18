@@ -1,12 +1,24 @@
 const puppeteer = require("puppeteer");
+const fs = require("fs");
+const path = require("path");
 const delayFunc = require("./delay");
+const PORT = 3000
 
 const linkedInScrape = async () => {
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
-  
 
   await page.setViewport({ width: 1920, height: 1080 });
+
+  // Set download behavior
+  const downloadPath = path.resolve(__dirname, 'downloaded CV');
+  if (!fs.existsSync(downloadPath)) {
+    fs.mkdirSync(downloadPath);
+  }
+  await page._client().send('Page.setDownloadBehavior', {
+    behavior: 'allow',
+    downloadPath: downloadPath,
+  });
 
   try {
     await page.goto("https://www.linkedin.com/login", {
@@ -36,10 +48,10 @@ const linkedInScrape = async () => {
       }
     });
 
-    await delayFunc.delay(5000); 
+    await delayFunc.delay(5000);
     const applicantURLs = await page.evaluate(() => {
       const anchors = document.querySelectorAll(".artdeco-list li a");
-      return Array.from(anchors).slice(0,3).map((anchor) => {
+      return Array.from(anchors).slice(0, 5).map((anchor) => {
         let href = anchor.href;
         if (href.startsWith("/")) {
           href = `https://www.linkedin.com${href}`;
@@ -48,7 +60,7 @@ const linkedInScrape = async () => {
       });
     });
 
-    console.log("Applicant URLs:", applicantURLs); 
+    console.log("Applicant URLs:", applicantURLs);
 
     const extractApplicantDetails = async (urls) => {
       const details = [];
@@ -64,11 +76,11 @@ const linkedInScrape = async () => {
             waitUntil: "domcontentloaded",
             timeout: 120000,
           });
-
+    
           // Click the "More" button to reveal additional data
           await applicantPage.click(".hiring-applicant-header-actions > div:last-of-type button");
           await delayFunc.delay(2000); // Wait for the data to load
-
+    
           // Extract name
           const name = await applicantPage.evaluate(() => {
             const nameElement = document.querySelector(
@@ -78,34 +90,65 @@ const linkedInScrape = async () => {
               ? nameElement.innerText.split("’s application")[0].trim()
               : null;
           });
-
+    
           // Extract profile link, email, and phone
           const { profileLink, email, phone } = await applicantPage.evaluate(() => {
             const dropdownItems = document.querySelectorAll('.artdeco-dropdown__content-inner ul li');
             const result = {};
-
+    
             if (dropdownItems.length >= 3) {
-              // First <li> for profileLink
               const profileElement = dropdownItems[0].querySelector('a');
               result.profileLink = profileElement ? profileElement.href : null;
-
-              // Second <li> for email
+    
               const emailElement = dropdownItems[1].querySelector('.hiring-applicant-header-actions__more-content-dropdown-item-text');
               result.email = emailElement ? emailElement.textContent.trim() : null;
-
-              // Third <li> for phone
-              const phoneElement = dropdownItems[2].querySelector('hiring-applicant-header-actions__more-content-dropdown-item-text');
+    
+              const phoneElement = dropdownItems[2].querySelector('.hiring-applicant-header-actions__more-content-dropdown-item-text');
               result.phone = phoneElement ? phoneElement.textContent.trim() : null;
             }
-
+    
             return result;
           });
-
-          if (name) {
-            details.push({ url, name, profileLink, email, phone });
+    
+          // Download CV if available
+          let cvPath = null;
+          try {
+            const cvDownloadElement = await applicantPage.$('.display-flex.justify-space-between.align-items-flex-start.pl5.pr5.pt5.pb3 a');
+            if (cvDownloadElement) {
+              await cvDownloadElement.click();
+              await delayFunc.delay(5000); // Wait for the download to complete
+    
+              const downloadDir = path.join(__dirname, 'downloaded CV');
+              const fileName = `${name.replace(/\s+/g, '_')}.pdf`;
+              cvPath = path.join(downloadDir, fileName);
+    
+              // Rename the CV to the applicant's name
+              const files = fs.readdirSync(downloadDir);
+              const latestFile = files.map(file => ({
+                name: file,
+                time: fs.statSync(path.join(downloadDir, file)).mtime.getTime()
+              }))
+              .sort((a, b) => b.time - a.time)
+              .map(file => file.name)[0];
+    
+              fs.renameSync(path.join(downloadDir, latestFile), cvPath);
+            }
+          } catch (cvError) {
+            console.log(`No CV found for ${name}: ${cvError.message}`);
           }
     
-          await delayFunc.delay(2000);
+          if (name) {
+            details.push({
+              url,
+              name,
+              profileLink,
+              email,
+              phone,
+              cvPath: cvPath ? `http://localhost:${PORT}/downloadedCV/${path.basename(cvPath)}` : null
+            });
+          }
+    
+        await delayFunc.delay(4000);
         } catch (error) {
           console.error(`Failed to extract details from ${url}:`, error);
         } finally {
@@ -115,7 +158,7 @@ const linkedInScrape = async () => {
     
       return details;
     };
-    
+
     const applicantNames = await extractApplicantDetails(applicantURLs);
 
     return { applicantURLs, applicantNames };
@@ -128,5 +171,5 @@ const linkedInScrape = async () => {
 };
 
 module.exports = {
-    linkedInScrape
-}
+  linkedInScrape
+};

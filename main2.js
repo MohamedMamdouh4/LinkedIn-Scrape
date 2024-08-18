@@ -1,10 +1,13 @@
 const express = require("express");
 const app = express();
+const path = require("path");
 const linkedInScrape = require('./linkedinScraper')
 
 const PORT = 3000
 app.use(express.json());
 
+
+app.use('/downloadedCV', express.static(path.join(__dirname, 'downloaded CV')));
 
 app.get("/applicant-names", async (req, res) => {
   try {
