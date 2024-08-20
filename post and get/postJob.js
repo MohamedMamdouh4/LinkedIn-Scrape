@@ -1,9 +1,9 @@
 const puppeteer = require('puppeteer');
-const delayFunc = require('../Utils/delay')
+var delayFunc = require('../Utils/delay')
 
 
-const postJob = async (job_title, contract_type , skills) => {
-    const browser = await puppeteer.launch({ headless: false });
+const postJob = async (job_title, contract_type , skills , description ,  user_name , password) => {
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
   try {
@@ -12,8 +12,8 @@ const postJob = async (job_title, contract_type , skills) => {
         // timeout: 240000
         });
         // Log in to LinkedIn
-        await page.type('#username', "andrewgeeklab@gmail.com");
-        await page.type('#password', "01501150039Aa*");
+        await page.type('#username', user_name);
+        await page.type('#password', password);
         // await delayFunc.delay(100000)
         await page.click('.btn__primary--large.from__button--floating'); 
         await page.waitForNavigation({ timeout: 600000 })
@@ -54,28 +54,26 @@ const postJob = async (job_title, contract_type , skills) => {
         const jobLocation = await page.click('.artdeco-typeahead__input[placeholder=""]')
         await page.click('.artdeco-typeahead__input[placeholder=""]'); // Job location
         await page.click('.artdeco-typeahead__input[placeholder=""]'); // Job location
-        await delayFunc.delay(2000)
+        await delayFunc.delay(1000)
         await page.keyboard.down('Control'); 
         await page.keyboard.press('A');
         await page.keyboard.up('Control');
         await page.keyboard.press('Backspace');
         await page.type('.artdeco-typeahead__input[placeholder=""]' , "Maadi")
-        await delayFunc.delay(2000)
-        await page.keyboard.press('ArrowDown');
-        await delayFunc.delay(2000)
+        await delayFunc.delay(2500)
         await page.keyboard.press('ArrowDown');
         await page.keyboard.press('Enter');
 
         ////
         await page.click('.job-posting-shared-job-type-dropdown__trigger') // Job type [Full-Time , Part-Time , .... , ....]
-        await delayFunc.delay(2000)
+        await delayFunc.delay(1000)
         for(let i = 0 ; i < contract_type ; i++)
         {
             await page.keyboard.press('ArrowDown');
-            await delayFunc.delay(2000)
+            await delayFunc.delay(100)
         }
         await page.keyboard.press('Enter');
-        await delayFunc.delay(2000)
+        await delayFunc.delay(500)
 
         /////
         await delayFunc.delay(2500)
@@ -88,21 +86,15 @@ const postJob = async (job_title, contract_type , skills) => {
         ////Second page////
         await page.click(".ql-editor")
         await page.keyboard.down('Control'); 
-        await delayFunc.delay(1000)
+        await delayFunc.delay(500)
         await page.keyboard.press('A');
-        await delayFunc.delay(1000)
+        await delayFunc.delay(500)
         await page.keyboard.up('Control');
-        await delayFunc.delay(1000)
+        await delayFunc.delay(500)
         await page.keyboard.press('Backspace');
-        await delayFunc.delay(1000)
-        await page.type(".ql-editor" , `Company Description
-            we suggest you enter details here
-            Role Description
-            This is a full-time on-site role for a Backend Node.js Developer at Orientation Code in Cairo.
-            Qualifications
-            Proficiency in Node.js and Express.js
-            Excellent communication skills and attention to detail`)
-        await delayFunc.delay(5000)
+        await delayFunc.delay(500)
+        await page.type(".ql-editor" , `${description}`)
+        await delayFunc.delay(1200)
         // Close skills section
         const closeSkills = await page.evaluate(() => {
             const closeButtons = document.querySelectorAll(".artdeco-pill.artdeco-pill--slate.artdeco-pill--2.artdeco-pill--dismiss.artdeco-pill--selected.ember-view.mv1.mr2.pv2");
@@ -117,7 +109,7 @@ const postJob = async (job_title, contract_type , skills) => {
         for(let i = 0 ; i<skills.length ; i++)
         {
             await page.type(".artdeco-pill__input.job-posting-shared-job-skill-typeahead__ta-trigger" , skills[i]);
-            await delayFunc.delay(1000)
+            await delayFunc.delay(2000)
             await page.keyboard.press("ArrowDown");
             await delayFunc.delay(1500)
             await page.keyboard.press("Enter");
@@ -127,18 +119,19 @@ const postJob = async (job_title, contract_type , skills) => {
         await page.click(".artdeco-button.artdeco-button--2.artdeco-button--primary.ember-view")
         await delayFunc.delay(2500)
         //// third page
-        await page.click("input[name='job-posting-apply-method-value']")
-        await delayFunc.delay(1000)
-        await page.keyboard.down('Control'); 
-        await delayFunc.delay(1000)
-        await page.keyboard.press('A');
-        await page.keyboard.up('Control');
-        await delayFunc.delay(1000)
-        await page.keyboard.press('Backspace');
-        await delayFunc.delay(1000)
-        await page.type("input[name='job-posting-apply-method-value']", "andrewgeeklab@gmail.com");
-        await delayFunc.delay(1000)
+        // await page.click("input[name='job-posting-apply-method-value']")
+        // await delayFunc.delay(100)
+        // await page.keyboard.down('Control'); 
+        // await delayFunc.delay(100)
+        // await page.keyboard.press('A');
+        // await page.keyboard.up('Control');
+        // await delayFunc.delay(100)
+        // await page.keyboard.press('Backspace');
+        // await delayFunc.delay(100)
+        // await page.type("input[name='job-posting-apply-method-value']", user_name);
+        await delayFunc.delay(1400)
         // Close questions section
+        
         const closeQuestions = await page.evaluate(() => {
         const closeButtons = document.querySelectorAll(".artdeco-button.artdeco-button--circle.artdeco-button--muted.artdeco-button--1.artdeco-button--tertiary.ember-view.artdeco-card__dismiss");
         closeButtons.forEach(button => button.click());
@@ -147,6 +140,7 @@ const postJob = async (job_title, contract_type , skills) => {
     
         console.log(`Closed ${closeQuestions} question(s)`);
 
+        // Add question section
         await delayFunc.delay(2500)
         page.click(".artdeco-button.artdeco-button--2.artdeco-button--primary.ember-view")
         await delayFunc.delay(9000)

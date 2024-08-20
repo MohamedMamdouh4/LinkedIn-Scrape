@@ -6,22 +6,22 @@ const jobPost = require('../post and get/postJob')
 const candidatesInfo = require('../post and get/getCandidates')
 
 const postJob = async(req , res) => {
-  const {job_title, contract_type , skills } = req.body;
-  if(!job_title || !contract_type || !skills)
+  const {job_title, contract_type , skills , description ,  user_name , password} = req.body;
+  if(!job_title || !contract_type || !skills || !description || !user_name || !password)
   {
     res.status(500).json({ success: false, message:"missing val" });
   }
   try 
   {
-    const result = await jobPost.postJob(job_title, contract_type , skills );
+    const result = await jobPost.postJob(job_title, contract_type , skills , description ,  user_name , password);
     res.json(result);
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 }
 
-const getApplicants = async () => {
-  const browser = await puppeteer.launch({ headless: false });
+const getApplicants = async (user_name , password) => {
+  const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
 
   await page.setViewport({ width: 1920, height: 1080 });
@@ -41,8 +41,8 @@ const getApplicants = async () => {
       waitUntil: "domcontentloaded",
       timeout: 240000,
     });
-    await page.type("#username", "andrewgeeklab@gmail.com");
-    await page.type("#password", "01501150039Aa*");
+    await page.type("#username", user_name);
+    await page.type("#password", password);
     await page.click('button[aria-label="Sign in"]');
     await page.waitForNavigation({ timeout: 600000 });
 
