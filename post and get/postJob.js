@@ -32,7 +32,7 @@ const postJob = async (job_title, contract_type , skills , description ,  user_n
         await page.keyboard.up('Control'); 
         await page.keyboard.press('Backspace'); 
         await page.type('#job-title-typeahead-input-ember26', job_title );
-          
+        console.log(`the feild of title has been inputed ${job_title}`)
         /////
 
         await page.click('.artdeco-typeahead__input.job-posting-shared-company-typeahead__input'); // Company name
@@ -42,6 +42,7 @@ const postJob = async (job_title, contract_type , skills , description ,  user_n
         await page.keyboard.press('Backspace');
         await page.type('#company-typeahead-input-ember34', 'orientation code'); 
         await delayFunc.delay(1000)
+        console.log(`the feild of com name has been inputed`)
         /////
 
         await page.click('.artdeco-dropdown.artdeco-dropdown--placement-bottom.artdeco-dropdown--justification-left.ember-view'); // Workplace type
@@ -49,7 +50,7 @@ const postJob = async (job_title, contract_type , skills , description ,  user_n
         await page.keyboard.press('ArrowDown');
         await delayFunc.delay(1000);
         await page.keyboard.press('Enter');
-
+        console.log(` Workplace type selected`)
         /////
         const jobLocation = await page.click('.artdeco-typeahead__input[placeholder=""]')
         await page.click('.artdeco-typeahead__input[placeholder=""]'); // Job location
@@ -63,7 +64,7 @@ const postJob = async (job_title, contract_type , skills , description ,  user_n
         await delayFunc.delay(2500)
         await page.keyboard.press('ArrowDown');
         await page.keyboard.press('Enter');
-
+        console.log(`location selected`)
         ////
         await page.click('.job-posting-shared-job-type-dropdown__trigger') // Job type [Full-Time , Part-Time , .... , ....]
         await delayFunc.delay(1000)
@@ -95,6 +96,8 @@ const postJob = async (job_title, contract_type , skills , description ,  user_n
         await delayFunc.delay(500)
         await page.type(".ql-editor" , `${description}`)
         await delayFunc.delay(1200)
+        console.log("description typed");
+        
         // Close skills section
         const closeSkills = await page.evaluate(() => {
             const closeButtons = document.querySelectorAll(".artdeco-pill.artdeco-pill--slate.artdeco-pill--2.artdeco-pill--dismiss.artdeco-pill--selected.ember-view.mv1.mr2.pv2");
@@ -139,7 +142,6 @@ const postJob = async (job_title, contract_type , skills , description ,  user_n
         });
     
         console.log(`Closed ${closeQuestions} question(s)`);
-
         // Add question section
         await delayFunc.delay(2500)
         page.click(".artdeco-button.artdeco-button--2.artdeco-button--primary.ember-view")
@@ -147,6 +149,7 @@ const postJob = async (job_title, contract_type , skills , description ,  user_n
 
         ////Final 
         await page.click(".job-posting-footer__secondary-cta.artdeco-button.artdeco-button--muted.artdeco-button--2.artdeco-button--secondary.ember-view")
+        console.log("task has been finished");
     }
     catch (error) 
     {

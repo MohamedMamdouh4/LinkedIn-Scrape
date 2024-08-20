@@ -9,12 +9,12 @@ const postJob = async(req , res) => {
   const {job_title, contract_type , skills , description ,  user_name , password} = req.body;
   if(!job_title || !contract_type || !skills || !description || !user_name || !password)
   {
-    res.status(500).json({ success: false, message:"missing val" });
+    return res.status(500).json({ success: false, message:"missing val" });
   }
   try 
   {
     const result = await jobPost.postJob(job_title, contract_type , skills , description ,  user_name , password);
-    res.json(result);
+    return resres.status(200).json(result);
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

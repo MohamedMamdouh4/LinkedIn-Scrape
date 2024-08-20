@@ -3,7 +3,7 @@ const app = express();
 const path = require("path");
 const linkedInController = require('./Controllers/linkedin_controller')
 const verify = require('./Middlewares/verify_token');
-const { error } = require("console");
+
 const PORT = 80
 app.use(express.json());
 
