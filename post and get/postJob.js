@@ -3,18 +3,18 @@ var delayFunc = require('../Utils/delay')
 
 
 const postJob = async (job_title, contract_type , skills , description ,  user_name , password) => {
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({ 
+        headless: false,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'] });
     const page = await browser.newPage();
 
   try {
         await page.goto('https://www.linkedin.com/login', { 
         waitUntil: "domcontentloaded",
-        // timeout: 240000
         });
         // Log in to LinkedIn
         await page.type('#username', user_name);
         await page.type('#password', password);
-        // await delayFunc.delay(100000)
         await page.click('.btn__primary--large.from__button--floating'); 
         await page.waitForNavigation({ timeout: 600000 })
 
@@ -23,7 +23,6 @@ const postJob = async (job_title, contract_type , skills , description ,  user_n
         //////
         await page.goto('https://www.linkedin.com/job-posting' , { 
             waitUntil: "domcontentloaded",
-            timeout: 240000
         });
         await page.click('.artdeco-typeahead__input[placeholder="Add the title you are hiring for"]'); // Focus on the input field
           
@@ -31,7 +30,7 @@ const postJob = async (job_title, contract_type , skills , description ,  user_n
         await page.keyboard.press('A');
         await page.keyboard.up('Control'); 
         await page.keyboard.press('Backspace'); 
-        await page.type('#job-title-typeahead-input-ember26', job_title );
+        await page.type('.artdeco-typeahead__input[placeholder="Add the title you are hiring for"]', job_title );
         console.log(`the feild of title has been inputed ${job_title}`)
         /////
 
@@ -40,7 +39,7 @@ const postJob = async (job_title, contract_type , skills , description ,  user_n
         await page.keyboard.press('A');
         await page.keyboard.up('Control'); 
         await page.keyboard.press('Backspace');
-        await page.type('#company-typeahead-input-ember34', 'orientation code'); 
+        await page.type('.artdeco-typeahead__input.job-posting-shared-company-typeahead__input', 'orientation code'); 
         await delayFunc.delay(1000)
         console.log(`the feild of com name has been inputed`)
         /////
@@ -50,7 +49,7 @@ const postJob = async (job_title, contract_type , skills , description ,  user_n
         await page.keyboard.press('ArrowDown');
         await delayFunc.delay(1000);
         await page.keyboard.press('Enter');
-        console.log(` Workplace type selected`)
+        console.log(`Workplace type selected`)
         /////
         const jobLocation = await page.click('.artdeco-typeahead__input[placeholder=""]')
         await page.click('.artdeco-typeahead__input[placeholder=""]'); // Job location
@@ -77,7 +76,7 @@ const postJob = async (job_title, contract_type , skills , description ,  user_n
         await delayFunc.delay(500)
 
         /////
-        await delayFunc.delay(2500)
+        await delayFunc.delay(2500000)
         await page.click("form > button")
         // await delayFunc.delay(200)
         // await page.click("form button:last-child")

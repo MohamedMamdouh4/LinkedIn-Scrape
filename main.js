@@ -3,8 +3,24 @@ const app = express();
 const path = require("path");
 const linkedInController = require('./Controllers/linkedin_controller')
 const verify = require('./Middlewares/verify_token');
+const { networkInterfaces } = require('os');
 
 const PORT = 80
+const getContainerIpAddress = () => {
+  const nets = networkInterfaces();
+  let containerIp = 'localhost';
+  for (const name of Object.keys(nets)) {
+      for (const net of nets[name]) {
+          if (net.family === 'IPv4' && !net.internal) {
+              containerIp = net.address;
+              break;
+          }
+      }
+  }
+  return containerIp;
+};
+const host = getContainerIpAddress();
+
 app.use(express.json());
 
 
@@ -27,6 +43,11 @@ app.post("/applicant-names", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+
+app.listen(PORT , async () => {
+  try {
+      console.log(`Server is Running And DB Connected http://${host}:${PORT}`);
+  } catch (error) {
+      console.log(error);
+  }
 });

@@ -21,7 +21,9 @@ const postJob = async(req , res) => {
 }
 
 const getApplicants = async (user_name , password) => {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({ 
+    headless: false,
+    args: ['--no-sandbox', '--disable-setuid-sandbox'] });
   const page = await browser.newPage();
 
   await page.setViewport({ width: 1920, height: 1080 });
